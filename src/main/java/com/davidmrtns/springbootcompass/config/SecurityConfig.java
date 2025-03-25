@@ -1,5 +1,6 @@
 package com.davidmrtns.springbootcompass.config;
 
+import com.davidmrtns.springbootcompass.security.CustomAuthenticationEntryPoint;
 import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.jose.jwk.source.ImmutableJWKSet;
 import org.springframework.beans.factory.annotation.Value;
@@ -31,14 +32,15 @@ public class SecurityConfig {
     private RSAPrivateKey priv;
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http, CustomAuthenticationEntryPoint entryPoint) throws Exception {
         http
             .csrf(AbstractHttpConfigurer::disable)
             .authorizeHttpRequests(auth -> auth
                     .requestMatchers("/auth").permitAll()
                     .anyRequest().authenticated()
             )
-            .httpBasic(Customizer.withDefaults())
+            .httpBasic(httpBasic -> httpBasic
+                    .authenticationEntryPoint(entryPoint))
             .oauth2ResourceServer(conf -> conf
                     .jwt(Customizer.withDefaults())
             );
